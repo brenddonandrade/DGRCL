@@ -1,1 +1,1 @@
-# Contrastive-Graph-Learning-Fin-tech-
+# Contrastive-Graph-Learning-Fintech
