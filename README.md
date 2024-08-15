@@ -1,1 +1,1 @@
-# Contrastive-Graph-Learning-Fintech
+# github repo for DGRCL
