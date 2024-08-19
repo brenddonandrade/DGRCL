@@ -1,0 +1,52 @@
+device: cuda:0
+
+model: egcn_h
+
+task: node_cls
+
+class_weights: [0.25, 0.75]
+use_2_hot_node_feats: False
+use_1_hot_node_feats: False
+save_node_embeddings: False
+
+train_proportion: 0.65
+dev_proportion: 0.1
+num_epochs: 100
+steps_accum_gradients: 1
+learning_rate: 0.001
+seed: 0
+
+adj_mat_time_window: 1
+num_hist_steps: 5
+data_loading_params:
+  batch_size: 1
+  num_workers: 0
+gcn_parameters:
+  feats_per_node: 100
+  layer_1_feats: 5
+  layer_1_feats_min: 30
+  layer_1_feats_max: 500
+  layer_2_feats: None
+  layer_2_feats_same_as_l1: True
+  k_top_grcu: 200
+  num_layers: 2
+  lstm_l1_layers: 1
+  lstm_l1_feats_min: 50
+  lstm_l1_feats_max: 500
+  lstm_l2_feats_same_as_l1: True
+  cls_feats: 510 # Hidden size of the classifier
+  cls_feats_min: 100
+  cls_feats_max: 700
+
+
+gca_encoder_in_channels: 100
+gca_encoder_out_channels: 256
+gca_num_hidden: 256
+gca_num_proj_hidden: 32
+gca_tau: 0.4
+
+
+drop_edge_rate_1: 0.5 # [0.1:0.9]
+drop_edge_rate_2: 0.2 # [0.1:0.9]
+drop_feature_rate_1: drop_edge_rate_1
+drop_feature_rate_2: drop_edge_rate_2
