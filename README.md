@@ -2,7 +2,7 @@
 
 code for paper ’Dynamic Graph Representation with Contrastive Learning for Stock Movement Prediction Integrating Temporal Evolution and Static Relations‘ (DGRCL) submitted to AAAI 2025
 
-![fig_DGRCL](D:\my\my\school\school\phd\2023\subjects\DGRCL\fig_DGRCL.jpg)
+![fig_DGRCL](\fig_DGRCL.jpg)
 
 ## Environment Installation / Requirements
 ### Requirements
