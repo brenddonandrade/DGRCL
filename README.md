@@ -1,6 +1,6 @@
 # github repo for DGRCL
 
-code for paper ’Dynamic Graph Representation with Contrastive Learning for Stock Movement Prediction Integrating Temporal Evolution and Static Relations‘ (DGRCL) submitted to AAAI 2025
+code for the paper ’Dynamic Graph Representation with Contrastive Learning for Financial Market Prediction: Integrating Temporal Evolution and Static Relations‘ (DGRCL) accepted by ICAART 2025 (https://icaart.scitevents.org/Home.aspx)
 
 ![image](https://github.com/PEIYUNHUA/DGRCL/blob/main/fig_DGRCL.jpg)
 
