@@ -18,12 +18,13 @@ class Stock_Temporal_Dataset():
 
 		if args.ablation_best_feature:
 			feature_use = 'f_l_b'
-			fl_path = r'data_source' + stock_name + '_' + feature_use
-			a_path = r'data_source' + stock_name + '_clean_a'
+			fl_path = r'data/' + stock_name + '_' + feature_use
+			
+			a_path = r'data/' + stock_name + '_clean_a'
 		else:
 			feature_use = 'f_l'
-			fl_path = r'data_source' + stock_name + '_' + feature_use
-			a_path = r'data_source' + stock_name + '_clean_a'
+			fl_path = r'data/' + stock_name + '_' + feature_use
+			a_path = r'data/' + stock_name + '_clean_a'
 
 		self.nodes_labels_times = self.load_node_labels(fl_path)
 

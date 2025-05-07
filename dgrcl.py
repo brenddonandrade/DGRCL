@@ -17,8 +17,12 @@ class DGRCL(nn.Module):
         self.gcn_args.feats_per_node = tasker.feats_per_node
         self.gcn = EGCN(self.gcn_args, activation=torch.nn.RReLU(), device=args.device)
 
-        # rnn
-        self.in_feats = args.gcn_parameters['layer_2_feats'] * 1
+    # rnn
+        l2 = args.gcn_parameters.get('layer_2_feats')
+        if l2 is None:
+            l2 = args.gcn_parameters['layer_1_feats']
+        self.in_feats = l2 *1
+        # self.in_feats = args.gcn_parameters['layer_2_feats'] * 1
         self.classifier = Classifier(args, in_features=self.in_feats, out_features=tasker.num_classes).to(args.device)
 
         # cl
@@ -37,7 +41,7 @@ class EGCN(torch.nn.Module):
         self.skipfeats = skipfeats
         self.GRCU_layers = []
         self._parameters = nn.ParameterList()
-        for i in range(1,len(feats)):
+        for i in range(1,len(feats)-1):
             GRCU_args = u.Namespace({'in_feats' : feats[i-1],
                                      'out_feats': feats[i],
                                      'activation': activation})
@@ -188,7 +192,7 @@ class TopK(torch.nn.Module):
         return out.t()
 
 class Classifier(nn.Module):
-    def __init__(self,args,out_features=2, in_features = None):
+    def __init__(self,args,out_features=5, in_features = None):
         super(Classifier,self).__init__()
         activation = torch.nn.ReLU()
 

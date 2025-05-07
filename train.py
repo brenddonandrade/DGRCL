@@ -69,24 +69,49 @@ def set_seed(seed):
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = False
     torch.backends.cudnn.benchmark = False
+# ⬇️ ADICIONE AQUI
+def clean_gcn_params(gcn):
+    def safe_int(val):
+        if val is None:
+            return None
+        if isinstance(val, str) and val.lower() == 'none':
+            return None
+        return int(val)
 
+    keys = [
+        'feats_per_node', 'layer_1_feats', 'layer_1_feats_min', 'layer_1_feats_max',
+        'layer_2_feats', 'k_top_grcu', 'num_layers', 'lstm_l1_layers',
+        'lstm_l1_feats_min', 'lstm_l1_feats_max', 'cls_feats',
+        'cls_feats_min', 'cls_feats_max'
+    ]
+    for key in keys:
+        if key in gcn:
+            try:
+                gcn[key] = safe_int(gcn[key])
+            except Exception as e:
+                print(f"⚠️ Could not convert gcn_parameter['{key}'] = {gcn[key]}: {e}")
+    return gcn
 
 if __name__ == '__main__':
 	save = './save/'
 	parser = u.create_parser()
 	args = u.parse_args(parser)
+	args.gcn_parameters = clean_gcn_params(args.gcn_parameters)
 
 	set_seed(args.seed)
+	
+	if not os.path.exists(save):
+		os.makedirs(save)
 
 	args.data_test = True
 	args.c_tem = 0.1
-
+	
 	if args.stock_name == 'nasdaq':
 		args.num_nodes = 1026
 	elif args.stock_name == 'nyse':
 		args.num_nodes = 1737
 
-	print(args)
+	
 	timestamp = time.strftime("%Y%m%d-%H%M%S")
 	cur_dir = os.getcwd()
 	rel_dir = "save"
@@ -109,6 +134,7 @@ if __name__ == '__main__':
 	#build the splitter
 	splitter = sp.splitter(args, tasker, relation_mask)
 
+	
 	model = DGRCL(args, tasker)
 	#build a loss
 	cross_entropy = F.cross_entropy

@@ -90,12 +90,25 @@ def get_edge_labels(edges,time):
     return {'idx': idx, 'vals': vals}
 
 
-def get_node_mask(cur_adj,num_nodes):
-    mask = torch.zeros(num_nodes) - float("Inf")
-    non_zero = cur_adj['idx'].unique()
+# def get_node_mask(cur_adj,num_nodes):
+#     mask = torch.zeros(num_nodes) - float("Inf")
+#     non_zero = cur_adj['idx'].unique()
 
-    mask[non_zero] = 0
+#     mask[non_zero] = 0
     
+#     return mask
+
+
+def get_node_mask(adj, num_nodes):
+    # mask = torch.ones(num_nodes, dtype=torch.bool, device=adj.device)
+    print(adj.keys())
+    mask = torch.ones(num_nodes, dtype=torch.bool, device=None)
+    
+    non_zero = adj['idx'].to_sparse().coalesce()._indices()[0]
+
+    # non_zero = adj['idx'].coalesce()._indices()[0]
+    valid = non_zero[non_zero < num_nodes]
+    mask[valid] = 0
     return mask
 
 
