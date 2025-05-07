@@ -4,6 +4,14 @@ model: egcn_h
 
 task: node_cls
 
+stock_name: nasdaq
+
+relation_self_loop: True
+
+ablation_best_feature: False
+ablation_contrastive: False
+
+relation_type: sector
 class_weights: [0.25, 0.75]
 use_2_hot_node_feats: False
 use_1_hot_node_feats: False
@@ -11,7 +19,7 @@ save_node_embeddings: False
 
 train_proportion: 0.65
 dev_proportion: 0.1
-num_epochs: 100
+num_epochs: 10
 steps_accum_gradients: 1
 learning_rate: 0.001
 seed: 0

@@ -15,7 +15,9 @@ class Stock_Temporal_Dataset():
 		self.data_test = args.data_test
 		self.args = args
 		stock_name = args.stock_name
-
+		
+		current_path = os.path.dirname(os.path.abspath(__file__))
+		data_path = os.path.join(current_path, 'data')
 		if args.ablation_best_feature:
 			feature_use = 'f_l_b'
 			fl_path = r'data/' + stock_name + '_' + feature_use
@@ -23,8 +25,10 @@ class Stock_Temporal_Dataset():
 			a_path = r'data/' + stock_name + '_clean_a'
 		else:
 			feature_use = 'f_l'
-			fl_path = r'data/' + stock_name + '_' + feature_use
-			a_path = r'data/' + stock_name + '_clean_a'
+			# fl_path = r'data/' + stock_name + '_' + feature_use+'/'
+			fl_path = os.path.join(data_path, (stock_name + '_' + feature_use))
+			a_path = os.path.join(data_path, (stock_name + '_clean_a'))
+			# a_path = r'data/' + stock_name + '_clean_a/'
 
 		self.nodes_labels_times = self.load_node_labels(fl_path)
 

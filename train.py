@@ -44,14 +44,14 @@ def build_classifier(args,tasker):
 def load_relation_data(args):
 	if args.stock_name == 'nasdaq':
 		if args.relation_type == 'sector':
-			relation_path = r'preprocessing/backup/nasdaq_sector_industry.npy'
+			relation_path = r'preprocessing/nasdaq_sector_industry.npy'
 		elif args.relation_type == 'wiki':
-			relation_path = r'preprocessing/backup/nasdaq_wiki.npy'
+			relation_path = r'preprocessing/nasdaq_wiki.npy'
 	elif args.stock_name == 'nyse':
 		if args.relation_type == 'sector':
-			relation_path = r'preprocessing/backup/nyse_sector_industry.npy'
+			relation_path = r'preprocessing/nyse_sector_industry.npy'
 		elif args.relation_type == 'wiki':
-			relation_path = r'preprocessing/backup/nyse_wiki.npy'
+			relation_path = r'preprocessing/nyse_wiki.npy'
 
 	mask = np.load(relation_path)
 	if args.relation_self_loop is True:
@@ -94,6 +94,8 @@ def clean_gcn_params(gcn):
 
 if __name__ == '__main__':
 	save = './save/'
+	if not os.path.exists(save):
+		os.makedirs(save)
 	parser = u.create_parser()
 	args = u.parse_args(parser)
 	args.gcn_parameters = clean_gcn_params(args.gcn_parameters)
