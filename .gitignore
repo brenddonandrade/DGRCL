@@ -8,12 +8,11 @@
 /dataSources.local.xm
 
 
-*.csv
-*.txt 
+
 data/google_finance/
 data/generated_data/
 data/nasdaq_f_l/
-data/nastadaq_clean_a/
+data/nasdaq_clean_a/
 save/
 
 

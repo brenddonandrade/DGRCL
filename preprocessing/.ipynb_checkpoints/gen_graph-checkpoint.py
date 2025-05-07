@@ -188,7 +188,6 @@ def save_label_feature_time_step(label, feature, time_steps):
 
         np.save(save_dir+str(each_step)+'_label.npy', stacked_label)
         np.save(save_dir+str(each_step)+'_feature.npy', stacked_feature)
-        print(each_step)
 
 
 def reindex(data):
@@ -222,13 +221,13 @@ def get_best_features(data, l_type, step_len):
 def fill_missing_values_mid(data):
     # Find the indices of non-NaN values
     valid_indices = np.where(~np.isnan(data) & (data != -1234) & ~np.isinf(data))[0]
-
-    # Use numpy.interp for linear interpolation
-    interpolated_data = np.interp(range(len(data)), valid_indices, data[valid_indices])
-
+    
     if len(valid_indices) == 0:
         # If there are no valid values, return the original array
         return data
+
+    # Use numpy.interp for linear interpolation
+    interpolated_data = np.interp(range(len(data)), valid_indices, data[valid_indices])
 
     return interpolated_data
 
@@ -297,12 +296,10 @@ def get_exp(n):
 #     print(i, get_exp(i))
 
 
-def gen_clean_a(steps):
+def gen_clean_a(steps,out_path, save_dir):
     threshold_list = []
     for time_steps in range(0, steps):
-        # adj_matrix = np.loadtxt(data_path+'\\'+str((window_size+1)+time_steps)+'('+str(time_steps)+')_a_matrix.txt', dtype=int)
-        adj_path='/mnt/c/Users/carlo/Desktop/importante/Desktop/Versatus/DGRCL/preprocessing/backup/nasdaq_sector_industry.txt'
-        adj_matrix = np.loadtxt(adj_path, dtype=int)
+        adj_matrix = np.loadtxt(save_dir+str((window_size+1)+time_steps)+'('+str(time_steps)+')_a_matrix.txt', dtype=int)
         eye = np.eye(adj_matrix.shape[0], dtype=int)
         exp_edge = get_exp_a_num(adj_matrix.shape[0])
         for value_threshold in range(1, np.max(adj_matrix)):
@@ -331,8 +328,8 @@ if __name__ == '__main__':
     # use for gen_a
     # data_dir = r'/data/raw_data/2013010120161230'
 
-    market = 'nyse'
-    data_path = r'../data/' + market
+    market = 'nasdaq'
+    data_path = r'/mnt/c/Users/carlo/Desktop/importante/Desktop/Versatus/DGRCL/data/' + market
     out_path = data_path + '_clean_a/'
     
     if not os.path.exists(out_path):
@@ -355,7 +352,7 @@ if __name__ == '__main__':
     # save_dir = 'nyse_f_l_b/'
 
     # save_dir = 'nasdaq/'
-    save_dir = 'nasdaq_f_l/'
+    save_dir = 'data/nasdaq_f_l/'
     # save_dir = 'nasdaq_f_l_b/'
 
     # stock_list = nyse_list
@@ -364,9 +361,10 @@ if __name__ == '__main__':
     # A
     # save_graph_a_step_magno(stock_list, window_size=20, normalize=False, n_jobs=-1)
     save_graph_a_step(stock_list)
-    # gen_clean_a(time_range - 2*(window_size+1))
+    gen_clean_a(time_range - 2*(window_size+1),out_path,save_dir)
 
     # X, Y
-    # labels, features = get_graph_label_and_feature(stock_list)
-    # save_label_feature_time_step(labels, features, time_range - (window_size + 1))
+
+    labels, features = get_graph_label_and_feature(stock_list)
+    save_label_feature_time_step(labels, features, time_range - (window_size + 1))
 

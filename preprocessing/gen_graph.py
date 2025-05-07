@@ -127,9 +127,9 @@ def save_graph_a_step(market_list):
                     alignment_distance =  dtw.distance_fast(a, b)
                     adj_matrix[a_stock][b_stock] = int(alignment_distance)
         
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
-        np.savetxt(save_dir + str(time_steps) +'('+ str(time_steps-window_size-1) + ')_a_matrix.txt', adj_matrix, fmt='%d', delimiter='\t')
+        # if not os.path.exists(save_dir):
+        #     os.makedirs(save_dir)
+        np.savetxt(save_dir + '/'+ str(time_steps) +'('+ str(time_steps-window_size-1) + ')_a_matrix.txt', adj_matrix, fmt='%d', delimiter='\t')
 
 
 def get_graph_label_and_feature(market_list):
@@ -186,8 +186,8 @@ def save_label_feature_time_step(label, feature, time_steps):
         stacked_label = np.stack([tensor.numpy() for tensor in step_label], axis=0)
         stacked_feature = np.stack([tensor.numpy() for tensor in step_feature], axis=0)
 
-        np.save(save_dir+str(each_step)+'_label.npy', stacked_label)
-        np.save(save_dir+str(each_step)+'_feature.npy', stacked_feature)
+        np.save(save_dir+'/'+str(each_step)+'_label.npy', stacked_label)
+        np.save(save_dir+'/'+str(each_step)+'_feature.npy', stacked_feature)
 
 
 def reindex(data):
@@ -292,20 +292,17 @@ def get_exp(n):
         s_res = s_res + 1/each
     return math.ceil(s_res)
 
-# for i in [2169, 2736]:
-#     print(i, get_exp(i))
 
 
 def gen_clean_a(steps,out_path, save_dir):
     threshold_list = []
     for time_steps in range(0, steps):
-        adj_matrix = np.loadtxt(save_dir+str((window_size+1)+time_steps)+'('+str(time_steps)+')_a_matrix.txt', dtype=int)
+        adj_matrix = np.loadtxt(save_dir+'/'+str((window_size+1)+time_steps)+'('+str(time_steps)+')_a_matrix.txt', dtype=int)
         eye = np.eye(adj_matrix.shape[0], dtype=int)
         exp_edge = get_exp_a_num(adj_matrix.shape[0])
         for value_threshold in range(1, np.max(adj_matrix)):
             edge_num = (np.sum((adj_matrix > 0) & (adj_matrix < value_threshold))*2 + adj_matrix.shape[0])
             if edge_num > exp_edge:
-                print('got in')
                 threshold_list.append(value_threshold)
                 mask = (adj_matrix > 0) & (adj_matrix < value_threshold)
                 adj_matrix_res = np.where(mask, 1, 0)
@@ -322,16 +319,15 @@ def gen_clean_a(steps,out_path, save_dir):
 #     print(0)
 
 if __name__ == '__main__':
-
+    #current path of preprocessing
+    current_path = os.path.dirname(os.path.abspath(__file__))
+    data_path = os.path.join(current_path, '..', 'data')
     # use for gen_feat
-    data_dir = r'/mnt/c/Users/carlo/Desktop/importante/Desktop/Versatus/DGRCL/data/raw_data/2013-01-01-2016-12-30'
+    data_dir = os.path.join(data_path, 'generated_data')
 
-    # use for gen_a
-    # data_dir = r'/data/raw_data/2013010120161230'
 
-    market = 'nasdq'
-    data_path = r'/mnt/c/Users/carlo/Desktop/importante/Desktop/Versatus/DGRCL/data/' + market
-    out_path = data_path + '_clean_a/'
+    market = 'nasdaq'
+    out_path = os.path.join(data_path,(market+ '_clean_a/'))
     
     if not os.path.exists(out_path):
         os.makedirs(out_path)
@@ -348,15 +344,12 @@ if __name__ == '__main__':
     mask, time_range = get_valid_day_mask([nasdaq_list, nyse_list])
     
 
-    # save_dir = 'nyse/'
-    # save_dir = 'nyse_f_l/'
-    # save_dir = 'nyse_f_l_b/'
-
     # save_dir = 'nasdaq/'
-    save_dir = 'nasdaq_f_l/'
-    # save_dir = 'nasdaq_f_l_b/'
+    save_dir=os.path.join(data_path, (market+'_f_l'))
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
 
-    # stock_list = nyse_list
+    
     stock_list = nasdaq_list
 
     # A

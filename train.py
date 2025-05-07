@@ -44,14 +44,14 @@ def build_classifier(args,tasker):
 def load_relation_data(args):
 	if args.stock_name == 'nasdaq':
 		if args.relation_type == 'sector':
-			relation_path = r'nasdaq_sector_industry.npy'
+			relation_path = r'preprocessing/nasdaq_sector_industry.npy'
 		elif args.relation_type == 'wiki':
-			relation_path = r'nasdaq_wiki.npy'
+			relation_path = r'preprocessing/nasdaq_wiki.npy'
 	elif args.stock_name == 'nyse':
 		if args.relation_type == 'sector':
-			relation_path = r'nyse_sector_industry.npy'
+			relation_path = r'preprocessing/nyse_sector_industry.npy'
 		elif args.relation_type == 'wiki':
-			relation_path = r'nyse_wiki.npy'
+			relation_path = r'preprocessing/nyse_wiki.npy'
 
 	mask = np.load(relation_path)
 	if args.relation_self_loop is True:
@@ -94,6 +94,8 @@ def clean_gcn_params(gcn):
 
 if __name__ == '__main__':
 	save = './save/'
+	if not os.path.exists(save):
+		os.makedirs(save)
 	parser = u.create_parser()
 	args = u.parse_args(parser)
 	args.gcn_parameters = clean_gcn_params(args.gcn_parameters)
@@ -206,11 +208,13 @@ if __name__ == '__main__':
 			log.format(e, mvalid_acc, mvalid_prec, mvalid_rec, mvalid_f1, mvalid_roc_auc, mvalid_mcc, (t2 - t1)))
 
 		# if mvalid_loss < min_loss:
-		# 	torch.save(model, save + 'model_epoch_' + str(e) + '_' + str(round(mvalid_loss, 2)) + '.pth')
+		# 	torch.save(model, save + 'model_epoch_' + str(e) + '_' + str(round(mvalid_loss, 4)) + '.pth')
 		# 	min_loss = mvalid_loss
-		if mvalid_mcc > max_mcc:
-			torch.save(model, save + 'model_epoch_' + str(e) + '_' + str(round(mvalid_mcc, 4)) + '.pth')
-			max_mcc = mvalid_loss
+		# if mvalid_mcc > max_mcc:
+		# 	torch.save(model, save + 'model_epoch_' + str(e) + '_' + str(round(mvalid_mcc, 4)) + '.pth')
+		# 	max_mcc = mvalid_loss
+		torch.save(model, save + 'model_epoch_' + str(e) + '_' + str(round(mvalid_mcc, 4)) + '.pth')
+		max_mcc = mvalid_loss			
 
 	bestid = np.argmax(his_mcc)
 	trainer.model = torch.load(save + 'model_epoch_' + str(bestid) + '_' + str(round(his_mcc[bestid], 4)) + '.pth')

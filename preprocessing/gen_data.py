@@ -104,19 +104,25 @@ if __name__ == '__main__':
            "trading days, all satisfied stocks (5 years & high price), " \
            "normalizing and compansating data"
     parser = argparse.ArgumentParser(description=desc)
-    path_default='/mnt/c/Users/carlo/Desktop/importante/Desktop/Versatus/DGRCL/data/raw_data'
+    current_path = os.path.dirname(os.path.abspath(__file__))
+    path_default=os.path.join(current_path, '..', 'data')
     parser.add_argument('-path', help='path of EOD data', default=path_default)
     # parser.add_argument('-market', help='market name', default='NYSE')
     parser.add_argument('-market', help='market name', default='NASDAQ')
 
     # NASDAQ NYSE
     args = parser.parse_args()
+    output_path = os.path.join(path_default,'generated_data')
 
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+
+    
     processor = EOD_Preprocessor(args.path, args.market)
     processor.generate_feature(
         processor.market_name + '_tickers_qualify_dr-0.98_min-5_smooth.csv',
         datetime.strptime('2013-01-01 00:00:00', processor.date_format),
         datetime.strptime('2017-01-01 00:00:00', processor.date_format),
         # os.path.join(processor.data_path, '..', '2013-01-01-2016-12-30')
-        os.path.join(processor.data_path, '2013-01-01-2016-12-30')
+        output_path
     )
