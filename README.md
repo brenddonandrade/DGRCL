@@ -6,22 +6,10 @@ code for the paper ’Dynamic Graph Representation with Contrastive Learning for
 
 ## Environment Installation / Requirements
 ### Requirements
+
+To install all requirements, use:
 ```
-cppimport==22.8.2
-joblib==1.3.2
-logger==1.4
-matplotlib==3.7.2
-networkx==3.1
-numpy==1.24.3
-pandas==2.0.3
-PyYAML==6.0.1
-PyYAML==6.0.2
-scikit_learn==1.3.0
-scipy==1.14.0
-torch==2.0.1+cu118
-torch_geometric==2.3.1
-torch_scatter==2.1.1+pt20cu118
-torch_sparse==0.6.17+pt20cu118
+conda env create -f environment.yml
 ```
 To install a new environment with the required packages, run the following commands:
 
@@ -49,16 +37,51 @@ install.sh
 ### Data
 The project's data is from "Temporal Relational Ranking for Stock Prediction" https://github.com/fulifeng/Temporal_Relational_Stock_Ranking.
 
-### process_data
+To get, use:
+```
+# Create directory to data
+mkdir data/google_finance
 
+# get data 
+git clone https://github.com/fulifeng/Temporal_Relational_Stock_Ranking.git
+cp Temporal_Relational_Stock_Ranking/data/google_finance/* data/google_finance
+
+# remove repository used to fetch data
+rm -rf Temporal_Relational_Stock_Ranking
+```
+
+### Processing the data
+
+To process data and generate the data to framework, user:
+```
+# Remember, activate the enviroment
+conda activate env_dgrcl
+
+# Then, use the script:
+python -u preprocessing/gen_data.py > gen_data.log 2>&1 
+
+# this do that any error (2>&1) or standard output going to gen_data.log
+```
 - **\preprocessing\gen_data.py ⟶ generate structured data**
 
+```
+# Next, this script going to generate the graph by Adjacency Matrix,
+python -u preprocessing/gen_graph.py > gen_graph.log 2>&1 
+
+```
 - **\preprocessing\gen_graph.py ⟶ get Adjacency Matrix, X and Y:**
 
 ### run_prediction
 
 - **train.py:**
 
+```
+# Finaly, this script going to generate the graph by Adjacency Matrix,
+python -u train.py > train.log 2>&1
+```
+
+
   Adjust hyper parameters in \experiments\parameters_dgrcl.yaml.
+
 
 

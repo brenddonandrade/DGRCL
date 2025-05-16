@@ -14,6 +14,7 @@ data/generated_data/
 data/nasdaq_f_l/
 data/nasdaq_clean_a/
 save/
+*.srm
 
 
 # Ignorar pastas comuns

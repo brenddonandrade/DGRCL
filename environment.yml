@@ -1,0 +1,27 @@
+name: env_dgrcl
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+dependencies:
+  - python=3.10
+  - numpy=1.24.3
+  - pandas=2.0.3
+  - scipy=1.11.4
+  - scikit-learn=1.3.0
+  - matplotlib=3.7.2
+  - networkx=3.1
+  - pyyaml=6.0.1          # mantido apenas 1 vez
+  - joblib=1.3.2
+  - cppimport=22.8.2
+  - logger=1.4
+  - pytorch=2.0.1
+  - torchvision
+  - torchaudio
+  - pytorch-cuda=11.7     # runtime/cuDNN etc.
+  - pip
+  - pip:
+      # wheels oficiais cu117 p/ Torch 2.0
+      - torch-scatter==2.1.1+pt20cu117
+      - torch-sparse==0.6.17+pt20cu117
+      - torch-geometric==2.3.1
