@@ -23,16 +23,6 @@ conda create --name dgrcl python
 ```
 conda activate dgrcl
 ```
-3. Install the required packages
- 
-_Using the requirements.txt file_:
-```
-pip install -r requirements.txt
-```
-_Or using the install.sh script_:
-```
-install.sh
-```
 
 ### Data
 The project's data is from "Temporal Relational Ranking for Stock Prediction" https://github.com/fulifeng/Temporal_Relational_Stock_Ranking.
@@ -58,17 +48,18 @@ To process data and generate the data to framework, user:
 conda activate env_dgrcl
 
 # Then, use the script:
-python -u preprocessing/gen_data.py > gen_data.log 2>&1 
+python -u preprocessing/gen_data.py 2>&1 | tee -a gen_data.log
 
 # this do that any error (2>&1) or standard output going to gen_data.log
 ```
+
 - **\preprocessing\gen_data.py ⟶ generate structured data**
 
 ```
 # Next, this script going to generate the graph by Adjacency Matrix,
-python -u preprocessing/gen_graph.py > gen_graph.log 2>&1 
-
+python -u preprocessing/gen_graph.py 2>&1 | tee -a gen_graph.log
 ```
+
 - **\preprocessing\gen_graph.py ⟶ get Adjacency Matrix, X and Y:**
 
 ### run_prediction
@@ -77,7 +68,7 @@ python -u preprocessing/gen_graph.py > gen_graph.log 2>&1
 
 ```
 # Finaly, this script going to generate the graph by Adjacency Matrix,
-python -u train.py > train.log 2>&1
+python -u train.py 2>&1 | tee -a train.log
 ```
 
 

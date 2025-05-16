@@ -14,7 +14,6 @@ dependencies:
   - pyyaml=6.0.1          # mantido apenas 1 vez
   - joblib=1.3.2
   - cppimport=22.8.2
-  - logger=1.4
   - pytorch=2.0.1
   - torchvision
   - torchaudio
@@ -24,4 +23,6 @@ dependencies:
       # wheels oficiais cu117 p/ Torch 2.0
       - torch-scatter==2.1.1+pt20cu117
       - torch-sparse==0.6.17+pt20cu117
+      - logger==1.4
+      - tqdm==4.67.1
       - torch-geometric==2.3.1
