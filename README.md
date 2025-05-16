@@ -9,7 +9,18 @@ code for the paper ’Dynamic Graph Representation with Contrastive Learning for
 
 To install all requirements, use:
 ```
+# to create the environment
 conda env create -f environment.yml
+
+# lib to cuda
+pip install torch==2.0.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+pip install torch-geometric==2.3.1 \
+  torch-scatter==2.1.1 \
+  torch-sparse==0.6.17 \
+  torch-cluster==1.6.1 \
+  torch-spline-conv==1.2.2 \
+  -f https://data.pyg.org/whl/torch-2.0.1+cu118.html
 ```
 To install a new environment with the required packages, run the following commands:
 
