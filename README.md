@@ -17,11 +17,12 @@ To install a new environment with the required packages, run the following comma
 
 (assuming miniconda installed on machine: https://docs.anaconda.com/miniconda/ ) 
 ```
-conda create --name dgrcl python
+conda env create -f environment.yml
 ```
+
 2. Activate the environment
 ```
-conda activate dgrcl
+conda activate env_dgrcl
 ```
 
 ### Data
