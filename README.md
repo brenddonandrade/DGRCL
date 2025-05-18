@@ -7,10 +7,17 @@ code for the paper ’Dynamic Graph Representation with Contrastive Learning for
 ## Environment Installation / Requirements
 ### Requirements
 
-To install all requirements, use:
+1. Create a new environment using conda 
+
 ```
 # to create the environment
-conda env create -f environment.yml
+conda create -n env_dgrcl python=3.10
+
+# and activate
+conda activate env_dgrcl
+
+# dependences by pip
+pip install -r requirements.txt
 
 # lib to cuda
 pip install torch==2.0.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
@@ -21,19 +28,6 @@ pip install torch-geometric==2.3.1 \
   torch-cluster==1.6.1 \
   torch-spline-conv==1.2.2 \
   -f https://data.pyg.org/whl/torch-2.0.1+cu118.html
-```
-To install a new environment with the required packages, run the following commands:
-
-1. Create a new environment using conda 
-
-(assuming miniconda installed on machine: https://docs.anaconda.com/miniconda/ ) 
-```
-conda env create -f environment.yml
-```
-
-2. Activate the environment
-```
-conda activate env_dgrcl
 ```
 
 ### Data
@@ -56,9 +50,6 @@ rm -rf Temporal_Relational_Stock_Ranking
 
 To process data and generate the data to framework, user:
 ```
-# Remember, activate the enviroment
-conda activate env_dgrcl
-
 # Then, use the script:
 python -u preprocessing/gen_data.py 2>&1 | tee -a gen_data.log
 
