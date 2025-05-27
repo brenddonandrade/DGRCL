@@ -326,7 +326,8 @@ if __name__ == '__main__':
     data_dir = os.path.join(data_path, 'generated_data')
 
 
-    market = 'nasdaq'
+    # market = 'nasdaq'
+    market = 'nyse'
     out_path = os.path.join(data_path,(market+ '_clean_a/'))
     
     if not os.path.exists(out_path):
@@ -350,7 +351,8 @@ if __name__ == '__main__':
         os.makedirs(save_dir)
 
     
-    stock_list = nasdaq_list
+    # stock_list = nasdaq_list
+    stock_list = nyse_list
 
     # A
     # save_graph_a_step_magno(stock_list, window_size=20, normalize=False, n_jobs=-1)

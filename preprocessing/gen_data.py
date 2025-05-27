@@ -107,8 +107,8 @@ if __name__ == '__main__':
     current_path = os.path.dirname(os.path.abspath(__file__))
     path_default=os.path.join(current_path, '..', 'data')
     parser.add_argument('-path', help='path of EOD data', default=path_default)
-    # parser.add_argument('-market', help='market name', default='NYSE')
-    parser.add_argument('-market', help='market name', default='NASDAQ')
+    parser.add_argument('-market', help='market name', default='NYSE')
+    # parser.add_argument('-market', help='market name', default='NASDAQ')
 
     # NASDAQ NYSE
     args = parser.parse_args()

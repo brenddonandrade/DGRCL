@@ -4,7 +4,7 @@ model: egcn_h
 
 task: node_cls
 
-stock_name: nasdaq
+stock_name: nyse
 
 relation_self_loop: True
 
@@ -19,7 +19,7 @@ save_node_embeddings: False
 
 train_proportion: 0.65
 dev_proportion: 0.1
-num_epochs: 10
+num_epochs: 100
 steps_accum_gradients: 1
 learning_rate: 0.001
 seed: 0
