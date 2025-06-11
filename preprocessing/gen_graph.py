@@ -14,6 +14,14 @@ from joblib import Parallel, delayed
 from scipy.stats import zscore
 
 
+# percorre um diretório (passado como argumento) para identificar e retornar dois grupos de arquivos:
+# Aqueles que contêm "NASDAQ" no nome do arquivo.
+# Aqueles que contêm "NYSE" no nome do arquivo.
+# A função retorna duas listas:
+# nasdaq_list: arquivos que parecem conter dados da NASDAQ.
+# nyse_list: arquivos que parecem conter dados da NYSE
+
+# return list of files with paters NASDAQ and NYSE
 def get_stock_list(directory):
     nasdaq_list = []
     nyse_list = []
@@ -22,7 +30,10 @@ def get_stock_list(directory):
         f = os.path.join(directory, filename)
         nasdaq = re.compile('NASDAQ')
         nyse = re.compile('NYSE')
+
+        # ensures that the item is a file, not a folder.
         if os.path.isfile(f):
+            # checks if the name starts with "NASDAQ".
             if nasdaq.match(filename):
                 nasdaq_list.append(f)
             if nyse.match(filename):
@@ -31,13 +42,17 @@ def get_stock_list(directory):
     return nasdaq_list, nyse_list
 
 
+# limpar e extrair janelas de dados de volume de uma série temporal (single_EOD), ignorando valores inválidos (representados por -1234, NaN ou Inf).
+# Ela retorna uma lista com janelas de volume, cada uma contendo window_size + 1 valores (normalmente representando dias consecutivos).
+# clean and extract windows of volume data from a time series
 def get_clean_volume(data):
     # if the data is not valid, use the closet one
     single_EOD = data
     volumes = []
     for i in range(window_size, len(single_EOD)):
         if single_EOD[i - window_size, 5] == -1234:
-            volume = [x for x in single_EOD[i - window_size:i + 1:, 5] if x != -1234]
+            volume = [x for x in single_EOD[i -
+                                            window_size:i + 1:, 5] if x != -1234]
             volume = np.array(volume)
             volume[np.isnan(volume)] = 0
             volume[np.isinf(volume)] = 0
@@ -49,13 +64,15 @@ def get_clean_volume(data):
             volumes.append(volume)
     return volumes
 
+
 def save_graph_a_step_magno(market_list, window_size=20, normalize=False, n_jobs=-1):
     all_volumes = []
 
     # 1. Load and process volume data
     for filepath in market_list:
         stock_name = re.split(r"[\\/]", filepath)[-1].split(".")[0]
-        single_EOD = np.genfromtxt(filepath, dtype=np.float32, delimiter=',', skip_header=False)
+        single_EOD = np.genfromtxt(
+            filepath, dtype=np.float32, delimiter=',', skip_header=False)
 
         # Reindex and clean
         single_EOD = reindex(single_EOD)
@@ -85,7 +102,8 @@ def save_graph_a_step_magno(market_list, window_size=20, normalize=False, n_jobs
                 return (i, j, dist)
             return (i, j, 0.0)
 
-        pairs = [(i, j) for i in range(n_stocks) for j in range(i + 1, n_stocks)]
+        pairs = [(i, j) for i in range(n_stocks)
+                 for j in range(i + 1, n_stocks)]
 
         results = Parallel(n_jobs=n_jobs)(
             delayed(compute_dtw_pair)(i, j) for i, j in pairs
@@ -97,13 +115,20 @@ def save_graph_a_step_magno(market_list, window_size=20, normalize=False, n_jobs
 
         # 4. Save
         filename = f"{time_step}({time_step - window_size - 1})_a_matrix.txt"
-        np.savetxt(Path(save_dir) / filename, adj_matrix, fmt='%.4f', delimiter='\t')
+        np.savetxt(Path(save_dir) / filename, adj_matrix,
+                   fmt='%.4f', delimiter='\t')
 
+
+# Lê os dados EOD (End Of Day) de várias ações.
+# Extrai janelas de volume limpas com get_clean_volume.
+# Para cada instante de tempo, cria uma matriz de adjacência baseada na distância DTW entre as séries de volume.
+# Salva essas matrizes como arquivos .txt.
 def save_graph_a_step(market_list):
     all_volumes = []
     for each in market_list:
         stock_name = re.split(r"\\", each)[-1].split(".")[0]
-        single_EOD = np.genfromtxt(each, dtype=np.float32, delimiter=',', skip_header=False)
+        single_EOD = np.genfromtxt(
+            each, dtype=np.float32, delimiter=',', skip_header=False)
 
         # reindex
         single_EOD = reindex(single_EOD)
@@ -111,7 +136,7 @@ def save_graph_a_step(market_list):
         each_volumes = get_clean_volume(single_EOD)
         all_volumes.append([stock_name, each_volumes])
     for time_steps in tqdm(range(window_size + 1, len(single_EOD) - window_size)):
-    # for time_steps in tqdm(range(779, len(single_EOD) - window_size)):
+        # for time_steps in tqdm(range(779, len(single_EOD) - window_size)):
         # dtw for same stock will be zero
         # adj_matrix = [[0 for _ in range(len(all_volumes))] for _ in range(len(all_volumes))]
         adj_matrix = np.zeros((len(all_volumes), len(all_volumes)))
@@ -124,19 +149,21 @@ def save_graph_a_step(market_list):
                 # dtw - python
                 if len(a) and len(b) != 0:
                     # alignment_distance = dtw.distance(a, b)
-                    alignment_distance =  dtw.distance_fast(a, b)
+                    alignment_distance = dtw.distance_fast(a, b)
                     adj_matrix[a_stock][b_stock] = int(alignment_distance)
-        
+
         # if not os.path.exists(save_dir):
         #     os.makedirs(save_dir)
-        np.savetxt(save_dir + '/'+ str(time_steps) +'('+ str(time_steps-window_size-1) + ')_a_matrix.txt', adj_matrix, fmt='%d', delimiter='\t')
+        np.savetxt(save_dir + '/' + str(time_steps) + '(' + str(time_steps -
+                   window_size-1) + ')_a_matrix.txt', adj_matrix, fmt='%d', delimiter='\t')
 
 
 def get_graph_label_and_feature(market_list):
     lab_all = []
     feature_all = []
     for each in tqdm(market_list, desc="Processing get_graph_label_and_feature"):
-        single_EOD = np.genfromtxt(each, dtype=np.float32, delimiter=',', skip_header=False)
+        single_EOD = np.genfromtxt(
+            each, dtype=np.float32, delimiter=',', skip_header=False)
 
         # reindex
         single_EOD = reindex(single_EOD)
@@ -145,7 +172,8 @@ def get_graph_label_and_feature(market_list):
         single_feature = single_EOD[:, 1:6]
 
         clean_close = fill_missing_values_mid(single_close)
-        clean_features = [fill_missing_values_mid(single_feature[i, :]) for i in range(single_feature.shape[0])]
+        clean_features = [fill_missing_values_mid(
+            single_feature[i, :]) for i in range(single_feature.shape[0])]
         clean_feature = np.stack(clean_features)
 
         label_list = np.array([])
@@ -183,8 +211,10 @@ def save_label_feature_time_step(label, feature, time_steps):
             step_label.append(each_label)
             step_feature.append(each_feature)
 
-        stacked_label = np.stack([tensor.numpy() for tensor in step_label], axis=0)
-        stacked_feature = np.stack([tensor.numpy() for tensor in step_feature], axis=0)
+        stacked_label = np.stack([tensor.numpy()
+                                 for tensor in step_label], axis=0)
+        stacked_feature = np.stack([tensor.numpy()
+                                   for tensor in step_feature], axis=0)
 
         np.save(save_dir+'/'+str(each_step)+'_label.npy', stacked_label)
         np.save(save_dir+'/'+str(each_step)+'_feature.npy', stacked_feature)
@@ -220,14 +250,16 @@ def get_best_features(data, l_type, step_len):
 
 def fill_missing_values_mid(data):
     # Find the indices of non-NaN values
-    valid_indices = np.where(~np.isnan(data) & (data != -1234) & ~np.isinf(data))[0]
-    
+    valid_indices = np.where(~np.isnan(data) & (
+        data != -1234) & ~np.isinf(data))[0]
+
     if len(valid_indices) == 0:
         # If there are no valid values, return the original array
         return data
 
     # Use numpy.interp for linear interpolation
-    interpolated_data = np.interp(range(len(data)), valid_indices, data[valid_indices])
+    interpolated_data = np.interp(
+        range(len(data)), valid_indices, data[valid_indices])
 
     return interpolated_data
 
@@ -238,9 +270,11 @@ def get_valid_day_mask(stock_lists):
     last_mask = []
     for each_list in stock_lists:
         for each in each_list:
-            single_EOD = np.genfromtxt(each, dtype=np.float32, delimiter=',', skip_header=False)
+            single_EOD = np.genfromtxt(
+                each, dtype=np.float32, delimiter=',', skip_header=False)
             data = single_EOD[:, 1]
-            valid_indices = np.where(np.isfinite(data) & (data != -1234) & (data != 0))
+            valid_indices = np.where(np.isfinite(
+                data) & (data != -1234) & (data != 0))
             first = valid_indices[0][0]
             last = valid_indices[0][-1]
             first_mask.append(first)
@@ -250,12 +284,14 @@ def get_valid_day_mask(stock_lists):
 
 def cal_pair_cos(data):
     cosine_similarity = nn.CosineSimilarity(dim=0)
-    largest_value = float('-inf')  # Start with negative infinity as a placeholder
+    # Start with negative infinity as a placeholder
+    largest_value = float('-inf')
     largest_index = -1
     # trans_loss = TransferLoss(l_type)
     for i in range(len(data)):
         for j in range(i + 1, len(data)):
-            loss = cosine_similarity(torch.tensor(fft(data[i]).real), torch.tensor(fft(data[j]).real))
+            loss = cosine_similarity(torch.tensor(
+                fft(data[i]).real), torch.tensor(fft(data[j]).real))
             if loss > largest_value:
                 # the best pair should be in different direction
                 if data[i][0] < data[i][-1] and data[j][0] > data[j][-1]:
@@ -274,6 +310,8 @@ def cal_pair_cos(data):
     return best_pair, best_index
 
 # exp_a_num = exp*2 + self
+
+
 def get_exp_a_num(n):
     return get_exp(n)*2 + n
 
@@ -293,21 +331,23 @@ def get_exp(n):
     return math.ceil(s_res)
 
 
-
-def gen_clean_a(steps,out_path, save_dir):
+def gen_clean_a(steps, out_path, save_dir):
     threshold_list = []
     for time_steps in range(0, steps):
-        adj_matrix = np.loadtxt(save_dir+'/'+str((window_size+1)+time_steps)+'('+str(time_steps)+')_a_matrix.txt', dtype=int)
+        adj_matrix = np.loadtxt(save_dir+'/'+str((window_size+1) +
+                                time_steps)+'('+str(time_steps)+')_a_matrix.txt', dtype=int)
         eye = np.eye(adj_matrix.shape[0], dtype=int)
         exp_edge = get_exp_a_num(adj_matrix.shape[0])
         for value_threshold in range(1, np.max(adj_matrix)):
-            edge_num = (np.sum((adj_matrix > 0) & (adj_matrix < value_threshold))*2 + adj_matrix.shape[0])
+            edge_num = (np.sum((adj_matrix > 0) & (
+                adj_matrix < value_threshold))*2 + adj_matrix.shape[0])
             if edge_num > exp_edge:
                 threshold_list.append(value_threshold)
                 mask = (adj_matrix > 0) & (adj_matrix < value_threshold)
                 adj_matrix_res = np.where(mask, 1, 0)
                 adj_matrix_res = adj_matrix_res + adj_matrix_res.T + eye
-                np.savetxt(out_path+str(time_steps)+'_clean_a.txt', adj_matrix_res, fmt='%d', delimiter='\t')
+                np.savetxt(out_path+str(time_steps)+'_clean_a.txt',
+                           adj_matrix_res, fmt='%d', delimiter='\t')
                 break
 
 
@@ -319,20 +359,18 @@ def gen_clean_a(steps,out_path, save_dir):
 #     print(0)
 
 if __name__ == '__main__':
-    #current path of preprocessing
+    # current path of preprocessing
     current_path = os.path.dirname(os.path.abspath(__file__))
     data_path = os.path.join(current_path, '..', 'data')
     # use for gen_feat
     data_dir = os.path.join(data_path, 'generated_data')
 
-
     # market = 'nasdaq'
     market = 'nyse'
-    out_path = os.path.join(data_path,(market+ '_clean_a/'))
-    
+    out_path = os.path.join(data_path, (market + '_clean_a/'))
+
     if not os.path.exists(out_path):
         os.makedirs(out_path)
-    
 
     # my_array = np.random.rand(20, 5)
     loss_type = 'cosine'
@@ -343,24 +381,22 @@ if __name__ == '__main__':
     nasdaq_list, nyse_list = get_stock_list(data_dir)
 
     mask, time_range = get_valid_day_mask([nasdaq_list, nyse_list])
-    
 
     # save_dir = 'nasdaq/'
-    save_dir=os.path.join(data_path, (market+'_f_l'))
+    save_dir = os.path.join(data_path, (market+'_f_l'))
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
-    
     # stock_list = nasdaq_list
     stock_list = nyse_list
 
     # A
     # save_graph_a_step_magno(stock_list, window_size=20, normalize=False, n_jobs=-1)
     save_graph_a_step(stock_list)
-    gen_clean_a(time_range - 2*(window_size+1),out_path,save_dir)
+    gen_clean_a(time_range - 2*(window_size+1), out_path, save_dir)
 
     # X, Y
 
     labels, features = get_graph_label_and_feature(stock_list)
-    save_label_feature_time_step(labels, features, time_range - (window_size + 1))
-
+    save_label_feature_time_step(
+        labels, features, time_range - (window_size + 1))

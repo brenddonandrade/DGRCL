@@ -4,6 +4,7 @@ import numpy as np
 import os
 from tqdm import tqdm
 
+
 class EOD_Preprocessor:
     def __init__(self, data_path, market_name):
         self.data_path = data_path
@@ -13,8 +14,9 @@ class EOD_Preprocessor:
     def _read_EOD_data(self):
         self.data_EOD = []
         for index, ticker in enumerate(self.tickers):
+            # read data and transform to numpy array, skip the first row
             single_EOD = np.genfromtxt(
-                os.path.join(self.data_path,'google_finance', self.market_name + '_' + ticker +
+                os.path.join(self.data_path, 'google_finance', self.market_name + '_' + ticker +
                              '_30Y.csv'), dtype=str, delimiter=',',
                 skip_header=True
             )
@@ -28,13 +30,15 @@ class EOD_Preprocessor:
     def add_return(self, selected_EOD_str, tra_date_index):
         selected_EOD = np.zeros(selected_EOD_str.shape, dtype=float)
         for row, daily_EOD in enumerate(selected_EOD_str):
+            # remove timezone
             date_str = daily_EOD[0].replace('-05:00', '')
             date_str = date_str.replace('-04:00', '')
             selected_EOD[row][0] = tra_date_index[date_str]
             for col in range(1, selected_EOD_str.shape[1]):
                 selected_EOD[row][col] = float(daily_EOD[col])
         # add feature,(volume(today/yesterday))-1
-        add_return = np.divide((selected_EOD[1:])[:, -1], (selected_EOD[:-1])[:, -1])-1
+        add_return = np.divide(
+            (selected_EOD[1:])[:, -1], (selected_EOD[:-1])[:, -1])-1
         selected_EOD[:, -1] = np.insert(add_return, 0, add_return.mean())
         return selected_EOD
 
@@ -45,13 +49,16 @@ class EOD_Preprocessor:
             ignoring suspension days (market open, only suspend this stock)
             Normalize features by (feature - min) / (max - min)
     '''
+
     def generate_feature(self, selected_tickers_fname, begin_date, end_date, opath):
-        
+
+        # read trading dates, a file with all trading dates
         trading_dates = np.genfromtxt(
-            os.path.join(self.data_path,self.market_name + '_aver_line_dates.csv'),
+            os.path.join(self.data_path, self.market_name +
+                         '_aver_line_dates.csv'),
             dtype=str, delimiter=',', skip_header=False
         )
-    
+
         print('#trading dates:', len(trading_dates))
         # begin_date = datetime.strptime(trading_dates[29], self.date_format)
         print('begin date:', begin_date)
@@ -66,9 +73,10 @@ class EOD_Preprocessor:
             os.path.join(self.data_path, selected_tickers_fname),
             dtype=str, delimiter='\t', skip_header=False
         )
-        
+
         print('#tickers selected:', len(self.tickers))
         self._read_EOD_data()
+        # generate features for each stock
         for stock_index, single_EOD in enumerate(tqdm(self.data_EOD)):
             # select data within the begin_date
             cur_list = []
@@ -81,17 +89,19 @@ class EOD_Preprocessor:
                     if end_date <= cur_date:
                         break
             selected_EOD_str = single_EOD[cur_list[0]: cur_list[-1]]
-            # _transfer_EOD_str添加feature
+            # add return feature
             selected_EOD = self.add_return(selected_EOD_str,
-                                                  tra_dates_index)
+                                           tra_dates_index)
 
             # fix missing
             if len(selected_EOD) != len(tra_dates_index):
-                miss_index = np.setdiff1d(np.arange(0, len(tra_dates_index), 1, float), selected_EOD[:, 0])
+                miss_index = np.setdiff1d(
+                    np.arange(0, len(tra_dates_index), 1, float), selected_EOD[:, 0])
                 for each_miss in range(len(miss_index)):
-                    miss_value = np.array([miss_index[each_miss], -1234, -1234, -1234, -1234, -1234])
-                    selected_EOD = np.insert(selected_EOD, each_miss, miss_value, axis=0)
-    
+                    miss_value = np.array(
+                        [miss_index[each_miss], -1234, -1234, -1234, -1234, -1234])
+                    selected_EOD = np.insert(
+                        selected_EOD, each_miss, miss_value, axis=0)
 
             np.savetxt(os.path.join(opath, self.market_name + '_' +
                                     self.tickers[stock_index] + '_' +
@@ -105,19 +115,18 @@ if __name__ == '__main__':
            "normalizing and compansating data"
     parser = argparse.ArgumentParser(description=desc)
     current_path = os.path.dirname(os.path.abspath(__file__))
-    path_default=os.path.join(current_path, '..', 'data')
+    path_default = os.path.join(current_path, '..', 'data')
     parser.add_argument('-path', help='path of EOD data', default=path_default)
     parser.add_argument('-market', help='market name', default='NYSE')
     # parser.add_argument('-market', help='market name', default='NASDAQ')
 
     # NASDAQ NYSE
     args = parser.parse_args()
-    output_path = os.path.join(path_default,'generated_data')
+    output_path = os.path.join(path_default, 'generated_data')
 
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
-    
     processor = EOD_Preprocessor(args.path, args.market)
     processor.generate_feature(
         processor.market_name + '_tickers_qualify_dr-0.98_min-5_smooth.csv',
