@@ -7,7 +7,7 @@
 /dataSources/
 /dataSources.local.xm
 
-
+**/data/
 
 data/google_finance/
 data/generated_data/

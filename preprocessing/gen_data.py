@@ -3,6 +3,7 @@ from datetime import datetime
 import numpy as np
 import os
 from tqdm import tqdm
+import yaml
 
 
 class EOD_Preprocessor:
@@ -16,7 +17,7 @@ class EOD_Preprocessor:
         for index, ticker in enumerate(self.tickers):
             # read data and transform to numpy array, skip the first row
             single_EOD = np.genfromtxt(
-                os.path.join(self.data_path, 'google_finance', self.market_name + '_' + ticker +
+                os.path.join(self.data_path, 'google_finance', self.market_name.upper() + '_' + ticker +
                              '_30Y.csv'), dtype=str, delimiter=',',
                 skip_header=True
             )
@@ -54,7 +55,7 @@ class EOD_Preprocessor:
 
         # read trading dates, a file with all trading dates
         trading_dates = np.genfromtxt(
-            os.path.join(self.data_path, self.market_name +
+            os.path.join(self.data_path, self.market_name.upper() +
                          '_aver_line_dates.csv'),
             dtype=str, delimiter=',', skip_header=False
         )
@@ -103,35 +104,43 @@ class EOD_Preprocessor:
                     selected_EOD = np.insert(
                         selected_EOD, each_miss, miss_value, axis=0)
 
-            np.savetxt(os.path.join(opath, self.market_name + '_' +
+            np.savetxt(os.path.join(opath, self.market_name.upper() + '_' +
                                     self.tickers[stock_index] + '_' +
                                     '1' + '.csv'), selected_EOD,
                        fmt='%.6f', delimiter=',')
 
 
 if __name__ == '__main__':
-    desc = "pre-process EOD data market by market, including listing all " \
-           "trading days, all satisfied stocks (5 years & high price), " \
-           "normalizing and compansating data"
-    parser = argparse.ArgumentParser(description=desc)
+    # desc = "pre-process EOD data market by market, including listing all " \
+    #        "trading days, all satisfied stocks (5 years & high price), " \
+    #        "normalizing and compansating data"
+    # parser = argparse.ArgumentParser(description=desc)
     current_path = os.path.dirname(os.path.abspath(__file__))
     path_default = os.path.join(current_path, '..', 'data')
-    parser.add_argument('-path', help='path of EOD data', default=path_default)
-    parser.add_argument('-market', help='market name', default='NYSE')
+    # # parser.add_argument('-market', help='market name', default='NYSE')
     # parser.add_argument('-market', help='market name', default='NASDAQ')
 
-    # NASDAQ NYSE
-    args = parser.parse_args()
+    # get config by ../experiments/parameters_dgrcl.yaml
+    path_parameters = os.path.join(current_path, '..', 'experiments')
+    with open(f'{path_parameters}/parameters_dgrcl.yaml', 'r') as file:
+        config = yaml.safe_load(file)
+
+    # # NASDAQ NYSE
+    # args = parser.parse_args()
     output_path = os.path.join(path_default, 'generated_data')
 
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
-    processor = EOD_Preprocessor(args.path, args.market)
+    print(config['stock_name'])
+    market = config['stock_name']
+
+    processor = EOD_Preprocessor(path_default, market)
     processor.generate_feature(
-        processor.market_name + '_tickers_qualify_dr-0.98_min-5_smooth.csv',
+        processor.market_name.upper() + '_tickers_qualify_dr-0.98_min-5_smooth.csv',
         datetime.strptime('2013-01-01 00:00:00', processor.date_format),
         datetime.strptime('2017-01-01 00:00:00', processor.date_format),
         # os.path.join(processor.data_path, '..', '2013-01-01-2016-12-30')
         output_path
     )
+

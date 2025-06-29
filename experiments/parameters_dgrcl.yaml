@@ -4,7 +4,7 @@ model: egcn_h
 
 task: node_cls
 
-stock_name: nyse
+stock_name: nasdaq
 
 relation_self_loop: True
 
